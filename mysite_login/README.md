@@ -50,37 +50,152 @@ INSTALLED_APPS = [
 ```
 
 在`login`应用文件夹中创建`urls.py`及`templates`文件夹
-配置项目根路由
+
+###2.配置数据库
+>2020年11月9日 第十周课内容
+
+建立一个新应用命名为`news`
+在项目包中的`settings.py`文件里添加`news`应用
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'login',
+    'news',
+]
+```
+配置models数据模型
+```pyhton
+from django.db import models
+
+class Reporter(models.Model):
+    full_name = models.CharField(max_length=70)
+
+    def __str__(self):
+        return self.full_name
+
+class Article(models.Model):
+    pub_date = models.DateField()
+    headline = models.CharField(max_length=200)
+    content = models.TextField()
+    reporter = models.ForeignKey(Reporter, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.headline
+```
+
+进行数据库迁移
+```python
+python manage.py makemigrations
+python manage.py migrate
+```
+
+配置`news`中的`admin`页面
 ```python
 from django.contrib import admin
+
+from . import models
+
+admin.site.register(models.Article)
+```
+创建超级用户，设置密码
+```
+python manage.py createsuperuser
+```
+在`news/admin.py`中创建`Repoter`模型
+
+在`news`文档中新建`urls.py`配置根路由
+
+```python
 from django.urls import path
-from django.conf.urls import url, include
+
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('login/', include('login.urls')),
+    path('articles/<int:year>/', views.year_archive),
+    path('articles/<int:year>/<int:month>/', views.month_archive),
+    path('articles/<int:year>/<int:month>/<int:pk>/', views.article_detail),
 ]
 ```
-
-在应用包下创建并配置`urls.py`文件
+在`news/views.py`中配置view函数
 ```python
-from django.conf.urls import url
-from . import views
-urlpatterns=[
-    url(r'^$',views.login_view)
+from django.shortcuts import render
 
-]
+from .models import Article
+
+def year_archive(request, year):
+    a_list = Article.objects.filter(pub_date__year=year)
+    context = {'year': year, 'article_list': a_list}
+    return render(request, 'news/year_archive.html', context)
+```
+创建文件`news/templates/news/year_archive.html`编写html页面样式
+```html
+{% extends "base.html" %}
+
+{% block title %}Articles for {{ year }}{% endblock %}
+
+{% block content %}
+<h1>Articles for {{ year }}</h1>
+
+{% for article in article_list %}
+    <p>{{ article.headline }}</p>
+    <p>By {{ article.reporter.full_name }}</p>
+    <p>Published {{ article.pub_date|date:"F j, Y" }}</p>
+{% endfor %}
+{% endblock %}
+```
+创建文件`news/templates/base.html`编写html页面样式
+```html
+{% load static %}
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <img src="http://www.cuc.edu.cn/_upload/site/00/05/5/logo.png" alt="Logo">
+    {% block content %}{% endblock %}
+</body>
+</html>
+```
+在`mysite_login/urlspy`中添加一行命令对`news`应用的地址进行配置
+```python
+    path('news/', include('news.urls')),
+```
+此时news应用网页可以正常访问
+可以在`news/templates/news/year_archive.html`中添加div样式尝试改变标题颜色
+```html
+<h1><div style="color:red">Articles for {{ year }}</div></h1>
 ```
 
+将相关修改内容及新建文件提交至`git`仓库
 
 
 
-```python
-def login_view(request):
-
-    return render(request,'login.html')
-```
 
 ##主要问题和解决方法
-
+1.在配置数据库时遇到问题，当使用pip安装sqlite后在vscode终端输入`sqlite3`想要访问数据库时提示
+```python
+PS E:\NetDisk\mysite_login> sqlite3
+sqlite3 : 无法将“sqlite3”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，   
+请确保路径正确，然后再试一次。
+所在位置 行:1 字符: 1
++ sqlite3
++ ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (sqlite3:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+```
+**根据提示错误代码应为sqlite环境未加入系统环境，从sqlite下载安装包并配置进系统环境后访问sqlite成功**
+```cmd
+C:\Users\dell>sqlite3
+SQLite version 3.33.0 2020-08-14 13:23:32
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+sqlite>
+```
 ##作业结果展示
+NetDisk仓库地址`https://github.com/BineaHsueh/NetDisk`

@@ -291,5 +291,10 @@ sqlite>
 
 后问题解决
 
+4.每次`git push`后会提示
+
+![avatar](pics/4.png)
+
+**解决方法：** 
 ##作业结果展示
 NetDisk仓库地址`https://github.com/BineaHsueh/NetDisk`

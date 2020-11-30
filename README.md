@@ -11,7 +11,7 @@
 
 ##作业完成过程
 
-###一.在vode中创建Django的项目文件
+###一.在vscode中创建Django的项目文件
 
 ####1.创建项目主体文件mysite_login
 
@@ -161,7 +161,7 @@ def year_archive(request, year):
 </body>
 </html>
 ```
-在`mysite_login/urlspy`中添加一行命令对`news`应用的地址进行配置
+在`mysite_login/urls.py`中添加一行命令对`news`应用的地址进行配置
 ```python
     path('news/', include('news.urls')),
 ```
@@ -233,7 +233,7 @@ urlpatterns = [
 ```python
 admin.site.register(models.Student)
 ```
-**进行数据库迁移`python .\manage.py makemigrations`,`python .\manage.py migrate`**
+**进行数据库迁移`python .\manage.py makemigrations` , `python .\manage.py migrate`**
 修改`news/temples/homework_form.html`form表单bug
 ```html
 <html>
@@ -295,6 +295,6 @@ sqlite>
 
 ![avatar](pics/4.png)
 
-**解决方法：** 
+**解决方法：** 本地仓库与git仓库文件不同步，输入`git pull origin master`抓取git仓库文件，将本地文件同步化即可。
 ##作业结果展示
 NetDisk仓库地址`https://github.com/BineaHsueh/NetDisk`
